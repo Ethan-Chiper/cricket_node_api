@@ -146,6 +146,51 @@ const Controllers = {
         } catch (error) {
             return { error: true, message: error };
         }
+    },
+
+    generateTeams : async (req, composition) => {
+        try {
+            let players = req?.body;
+            console.log(players);
+            const teams = [];
+            const wkPlayers = Object.keys(players).filter((player) => Object.keys(players[player])[0] === 'WK');
+            const batPlayers = Object.keys(players).filter((player) => Object.keys(players[player])[0] === 'BAT');
+            const arPlayers = Object.keys(players).filter((player) => Object.keys(players[player])[0] === 'AR');
+            const bowPlayers = Object.keys(players).filter((player) => Object.keys(players[player])[0] === 'BOW');
+          
+            // Sort players by their percentage values in descending order
+            wkPlayers.sort((a, b) => players[b][Object.keys(players[b])[0]] - players[a][Object.keys(players[a])[0]]);
+            batPlayers.sort((a, b) => players[b][Object.keys(players[b])[0]] - players[a][Object.keys(players[a])[0]]);
+            arPlayers.sort((a, b) => players[b][Object.keys(players[b])[0]] - players[a][Object.keys(players[a])[0]]);
+            bowPlayers.sort((a, b) => players[b][Object.keys(players[b])[0]] - players[a][Object.keys(players[a])[0]]);
+          
+            // Select top players for each position
+            const topWK = wkPlayers[0];
+            const topBAT = batPlayers.slice(0, composition.BAT);
+            const topAR = arPlayers.slice(0, composition.AR);
+          
+            // Generate teams with min 3 and max 4 bowlers
+            for (let i = composition.BOW[0]; i <= composition.BOW[1]; i++) {
+              const topBOW = bowPlayers.slice(0, i);
+              const team = {};
+              team[topWK] = players[topWK];
+              topBAT.forEach((player) => {
+                team[player] = players[player];
+              });
+              topAR.forEach((player) => {
+                team[player] = players[player];
+              });
+              topBOW.forEach((player) => {
+                team[player] = players[player];
+              });
+              teams.push(team);
+            }
+        return {
+            error: false, message: "Team Players" , teams : teams
+        };
+        } catch (error) {
+            return { error: true, message: error };
+        }
     }
 };
 
