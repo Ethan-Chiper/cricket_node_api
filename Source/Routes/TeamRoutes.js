@@ -4,7 +4,7 @@ const {validationResult} = require('express-validator');
 const Responder = require('../App/Responder');
 const {isEmpty} = require('../Helpers/Utils');
 const {teamValidation}= require('../Validators/TeamValidator');
-const { addTeam, processResult, getTeamResults} = require('../Controllers/TeamController');
+const { addTeam, processResult, getTeamResults, generateTeams} = require('../Controllers/TeamController');
 
 Router.post('/sign_up', teamValidation(), async (req, res) => {
 	try {
@@ -43,6 +43,25 @@ Router.get('/team-result', async (req, res) => {
 			return Responder.sendSuccessData(res, message, data);
 		}
 		return Responder.sendFailureMessage(res, message, 400);
+	} catch (error) {
+		return Responder.sendFailureMessage(res, error, 500);
+	}
+});
+
+Router.get('/get_team', async (req, res) => {
+	try {
+		const teamComposition = {
+			WK: 1,
+			BAT: 3,
+			AR: 2,
+			BOW: 5,
+		  };
+		let data = await generateTeams(req, teamComposition);
+		console.log(data);
+		if (!isEmpty(data) && data?.error === false) {
+			return Responder.sendSuccessData(res, data?.message, data?.teams);
+		}
+		return Responder.sendFailureMessage(res, data?.message, 400);
 	} catch (error) {
 		return Responder.sendFailureMessage(res, error, 500);
 	}
